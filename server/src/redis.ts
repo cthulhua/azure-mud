@@ -297,7 +297,15 @@ const Redis: RedisInternal = {
 
   async setWebhookDeployKey (key: string) {
     return await setCache('deployWebhookKey', key)
-  }
+  },
+  
+  async addRoomActivity (roomId: string) {
+    await setCache(roomActivityKey(roomId), Date.now())
+  },
+  
+  async getRoomActivity (roomId: string): Promise<number> {
+    return await getCache(roomActivityKey(roomId))
+  },
 }
 
 const activeUsersKey = 'activeUsersList'
@@ -330,6 +338,10 @@ function roomPresenceKey (roomName: string): string {
 
 function roomNotesKey (roomId: string): string {
   return `${roomId}Notes`
+}
+
+function roomActivityKey (roomId: string): string {
+  return `${roomId}Activity`
 }
 
 export function videoPresenceKey (roomId: string) {

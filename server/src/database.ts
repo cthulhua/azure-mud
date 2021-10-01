@@ -97,6 +97,9 @@ interface Database {
   webhookDeployKey()
 
   setWebhookDeployKey(key: string)
+
+  addRoomActivity(roomId: string)
+  getRoomActivity(roomId: string): Promise<number>
 }
 
 // eslint-disable-next-line no-undef
