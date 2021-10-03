@@ -59,7 +59,7 @@ export async function connect (userId: string, dispatch: Dispatch<Action>) {
   dispatch(UserMapAction(result.users))
 
   if (result.roomData) {
-    dispatch(UpdatedRoomDataAction(convertServerRoomData(result.roomData, result.roomActivityStatus)))
+    dispatch(UpdatedRoomDataAction(convertServerRoomData(result.roomData)))
   }
 
   if (result.profile) {

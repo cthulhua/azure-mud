@@ -54,12 +54,7 @@ export interface RoomResponse {
   users?: { [userId: string]: MinimalUser };
   roomData?: { [roomId: string]: Room };
   profile?: PublicUser;
-  roomNotes?: RoomNote[];
-  roomActivityStatus?: RoomActivityStatus
-}
-
-export interface RoomActivityStatus {
-  roomActivity: { [roomId: string] : number }
+  roomNotes?: RoomNote[]
 }
 
 export interface ErrorResponse {

@@ -8,7 +8,6 @@ import { getUserIdForUsername, User } from '../user'
 import { MESSAGE_MAX_LENGTH, MESSAGE_MAX_WORD_LENGTH } from '../config'
 import { dance } from '../dance'
 import { interact } from '../interact'
-import {DB} from '../database'
 
 const sendChatMessage: AuthenticatedEndpointFunction = async (user: User, inputs: any, log: LogFn) => {
   const message = inputs.text
@@ -109,7 +108,6 @@ const sendChatMessage: AuthenticatedEndpointFunction = async (user: User, inputs
   }
 
   log(`Sending to ${user.roomId}: ${message} from ${user.id}`)
-  DB.addRoomActivity(user.roomId);
 
   return {
     messages: [
