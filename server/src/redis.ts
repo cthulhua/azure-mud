@@ -1,6 +1,6 @@
 import { promisify } from 'util'
 import { User, isMod } from './user'
-import { ServerSettings, DEFAULT_SERVER_SETTINGS, toServerSettings } from './types'
+import { ServerSettings, DEFAULT_SERVER_SETTINGS, toServerSettings, RoomActivityStatus } from './types'
 import { RoomNote } from './roomNote'
 import { roomData } from './rooms'
 import Database from './database'
@@ -305,6 +305,16 @@ const Redis: RedisInternal = {
   
   async getRoomActivity (roomId: string): Promise<number> {
     return await getCache(roomActivityKey(roomId))
+  },
+  
+  async allRoomActivity (): Promise<RoomActivityStatus> {
+    const allRoomIds = Object.keys(roomData)
+    const data = {}
+    await Promise.all(allRoomIds.map(async id => {
+      const activityStatus = await Redis.getRoomActivity(id)
+      data[id] = activityStatus
+    }))
+    return {roomActivity: data}
   },
 }
 
