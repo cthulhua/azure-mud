@@ -1,6 +1,6 @@
 import { promisify } from 'util'
 import { User, isMod } from './user'
-import { ServerSettings, DEFAULT_SERVER_SETTINGS, toServerSettings } from './types'
+import { ServerSettings, DEFAULT_SERVER_SETTINGS, toServerSettings, RoomActivityStatus } from './types'
 import { RoomNote } from './roomNote'
 import { roomData } from './rooms'
 import Database from './database'
@@ -297,6 +297,24 @@ const Redis: RedisInternal = {
 
   async setWebhookDeployKey (key: string) {
     return await setCache('deployWebhookKey', key)
+  },
+
+  async addRoomActivity (roomId: string) {
+    await setCache(roomActivityKey(roomId), Date.now())
+  },
+
+  async getRoomActivity (roomId: string): Promise<number> {
+    return await getCache(roomActivityKey(roomId))
+  },
+
+  async allRoomActivity (): Promise<RoomActivityStatus> {
+    const allRoomIds = Object.keys(roomData)
+    const data = {}
+    await Promise.all(allRoomIds.map(async id => {
+      const activityStatus = await Redis.getRoomActivity(id)
+      data[id] = activityStatus
+    }))
+    return { roomActivity: data }
   }
 }
 
@@ -330,6 +348,10 @@ function roomPresenceKey (roomName: string): string {
 
 function roomNotesKey (roomId: string): string {
   return `${roomId}Notes`
+}
+
+function roomActivityKey (roomId: string): string {
+  return `${roomId}Activity`
 }
 
 export function videoPresenceKey (roomId: string) {
