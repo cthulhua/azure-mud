@@ -6,6 +6,14 @@ import Redis from './redis'
 
 interface Database {
   // -----------------------------------------------------------------
+  // FIREBASE TOKEN CACHE
+  // -----------------------------------------------------------------
+  // If the token is in the cache, but not current, this will return false and evict it
+  userIdForFirebaseToken(token: string): Promise<string | undefined>
+
+  addFirebaseTokenToCache(token: string, userId: string, expiry: number)
+
+  // -----------------------------------------------------------------
   // WORLD PRESENCE
   // -----------------------------------------------------------------
 
@@ -53,6 +61,8 @@ interface Database {
 
   /** Overwrites the stored user profile with a new one */
   setUserProfile(userId: string, data: User): Promise<User>;
+
+  setPartialUserProfile (userId: string, user: Partial<User>): Promise<User>
 
   /** Sets that the user shouted right now */
   userJustShouted(user: User);
