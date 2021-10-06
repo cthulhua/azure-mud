@@ -38,7 +38,7 @@ export function convertServerRoomData (roomData: {
       noteWallData: room.noteWallData,
       hidden: room.hidden,
       specialFeatures: room.specialFeatures,
-      activityStatus: roomActivityStatus.roomActivity[k] 
+      activityStatus: roomActivityStatus.roomActivity[k]
     }
   })
 
