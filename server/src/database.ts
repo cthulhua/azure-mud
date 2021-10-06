@@ -1,6 +1,6 @@
 import { User } from './user'
 import { RoomNote } from './roomNote'
-import { ServerSettings } from './types'
+import { ServerSettings, RoomActivityStatus } from './types'
 
 import Redis from './redis'
 
@@ -107,6 +107,10 @@ interface Database {
   webhookDeployKey()
 
   setWebhookDeployKey(key: string)
+
+  addRoomActivity(roomId: string)
+  getRoomActivity(roomId: string): Promise<number>
+  allRoomActivity(): Promise<RoomActivityStatus>
 }
 
 // eslint-disable-next-line no-undef

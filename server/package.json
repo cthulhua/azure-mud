@@ -21,8 +21,8 @@
     "uuid": "^8.3.0"
   },
   "devDependencies": {
-    "@types/redis": "^2.8.24",
     "@azure/functions": "^1.0.2-beta2",
+    "@types/redis": "^2.8.24",
     "typescript": "^3.3.3"
   }
 }
