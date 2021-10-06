@@ -25,9 +25,9 @@ export function convertServerRoomData (roomData: {
 
   Object.keys(roomData).forEach((k) => {
     const room = roomData[k]
-  console.log("Got room activity status");
-  console.log(k);
-  console.log(roomActivityStatus.roomActivity[k]);
+    console.log("Got room activity status");
+    console.log(k);
+    console.log(roomActivityStatus.roomActivity[k]);
     newObj[k] = {
       name: room.displayName,
       id: room.id,
