@@ -23,10 +23,11 @@ export function convertServerRoomData (roomData: {
   roomActivityStatus: RoomActivityStatus): { [roomId: string]: Room } {
   const newObj = {}
 
-  console.log("Got room activity status");
-  console.log(roomActivityStatus.roomActivity);
   Object.keys(roomData).forEach((k) => {
     const room = roomData[k]
+  console.log("Got room activity status");
+  console.log(k);
+  console.log(roomActivityStatus.roomActivity[k]);
     newObj[k] = {
       name: room.displayName,
       id: room.id,
