@@ -14,7 +14,7 @@ export interface Room {
   noteWallData: Server.NoteWallData
   notes?: RoomNote[]
   specialFeatures?: Server.SpecialFeature[]
-  activityStatus?: number
+  active: boolean
 }
 
 export function convertServerRoomData (roomData: {
@@ -22,12 +22,19 @@ export function convertServerRoomData (roomData: {
 },
   roomActivityStatus: RoomActivityStatus): { [roomId: string]: Room } {
   const newObj = {}
+  let now = Date.now();
 
   Object.keys(roomData).forEach((k) => {
     const room = roomData[k]
     console.log("Got room activity status");
     console.log(k);
-    console.log(roomActivityStatus.roomActivity[k]);
+    let lastActiveTime = roomActivityStatus.roomActivity[k];
+    console.log(lastActiveTime);
+    let active = false;
+    if (lastActiveTime !== undefined) {
+      active = lastActiveTime >= now - 60000
+    }
+    console.log(active);
     newObj[k] = {
       name: room.displayName,
       id: room.id,
@@ -38,7 +45,7 @@ export function convertServerRoomData (roomData: {
       noteWallData: room.noteWallData,
       hidden: room.hidden,
       specialFeatures: room.specialFeatures,
-      activityStatus: roomActivityStatus.roomActivity[k]
+      active: active
     }
   })
 

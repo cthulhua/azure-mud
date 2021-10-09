@@ -59,6 +59,7 @@ export type Action =
   | SpaceIsClosedAction
   | SpaceOpenedOrClosedAction
   | CommandMessageAction
+  | RoomActivityUpdatedAction
 
 export enum ActionType {
   // Server-driven action
@@ -84,6 +85,7 @@ export enum ActionType {
   PlayerBanned = 'PLAYER_BANNED',
   PlayerUnbanned = 'PLAYER_UNBANNED',
   UpdateProfileColor = 'UPDATE_PROFILE_COLOR',
+  RoomActivityUpdated = 'ROOM_ACTIVITY_UPDATED',
   // WebRTC
   StopVideoChat = 'STOP_VIDEO_CHAT',
   StartVideoChat = 'START_VIDEO_CHAT',
@@ -491,6 +493,17 @@ export const ErrorAction = (error: string): ErrorAction => {
   }
 }
 
+interface RoomActivityUpdatedAction {
+  type: ActionType.RoomActivityUpdated;
+  value: string[];
+}
+
+export const RoomActivityUpdatedAction = (activeRooms: string[]): RoomActivityUpdatedAction => {
+  return {
+    type: ActionType.RoomActivityUpdated,
+    value: activeRooms
+  }
+}
 // UI Actions
 
 // HACK ALERT: Used to force a re-render, but ideally the data relevant to the re-render should be tied to the action.

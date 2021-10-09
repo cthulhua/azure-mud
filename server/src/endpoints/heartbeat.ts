@@ -56,12 +56,19 @@ const heartbeat: EndpointFunction = async (inputs: any, log: LogFn) => {
       `Removing the following inactive users: ${usersToRemove.join(', ')}`
     )
   }
+  const roomActivity= (await DB.allRoomActivity()).roomActivity;
+  const activeRooms = [];
+  Object.keys(roomActivity).forEach((roomId) => {
+    if (roomActivity[roomId] > nowValue - 60000) {
+      activeRooms.push(roomId);
+    }
+  })
 
   return {
     messages: [
       {
         target: 'ping',
-        arguments: []
+        arguments: [activeRooms]
       }
     ],
     groupManagementTasks

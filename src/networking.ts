@@ -32,6 +32,7 @@ import {
   PlayerBannedAction,
   PlayerUnbannedAction,
   ReceivedServerSettingsAction,
+  RoomActivityUpdatedAction,
   ShowModalAction, CommandMessageAction, CaptionMessageAction
 } from './Actions'
 import { User } from '../server/src/user'
@@ -399,8 +400,9 @@ async function connectSignalR (userId: string, dispatch: Dispatch<Action>) {
     callAzureFunction('disconnect')
   })
 
-  connection.on('ping', () => {
+  connection.on('ping', (activeRooms) => {
     console.log('Received heartbeat ping')
+    dispatch(RoomActivityUpdatedAction(activeRooms))
     callAzureFunction('pong')
   })
 
