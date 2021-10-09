@@ -40,20 +40,8 @@ export default function LoggedOutView () {
           everyone else!
         </p>
         <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={firebase.auth()} />
-        {(window as any).safari
-          ? <p>
-            <strong style={{ color: 'red' }}> You appear to be using Safari.</strong> <br/>
-            If you are having difficulty logging in, you may need to allow third-party cookies
-            <ul>
-              <li>On macOS, Safari -&gt; Preferences -&gt; uncheck "Prevent cross-site tracking"</li>
-              <li>On iOS, Settings -&gt; Safari -&gt; uncheck "Prevent cross-site tracking"</li>
-            </ul>
-            We know this is sketchy! We promise we're not capturing or selling data to any third party, it's just a limitation of the way we're handling logins.<br/>
-            If you're not comfortable with this, feel free to switch to Chrome, Firefox, or another non-Safari browser on your Mac.
-          </p> : null
-        }
         <p>
-          If you use email, we will require you to authenticate the email.
+          If you log in via email, we will require you to verify that email address.
         </p>
         <p>
           No matter which service you log in with, we do not access any data
