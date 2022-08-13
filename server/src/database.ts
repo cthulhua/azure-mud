@@ -1,17 +1,18 @@
-import { User } from './user'
-import { RoomNote } from './roomNote'
-import { ServerSettings, RoomActivityStatus } from './types'
+import { User } from "./user";
+import { RoomNote } from "./roomNote";
+import { ServerSettings, RoomActivityStatus } from "./types";
 
-import Redis from './redis'
+import Redis from "./redis";
+import { Room } from "./rooms";
 
 interface Database {
   // -----------------------------------------------------------------
   // FIREBASE TOKEN CACHE
   // -----------------------------------------------------------------
   // If the token is in the cache, but not current, this will return false and evict it
-  userIdForFirebaseToken(token: string): Promise<string | undefined>
+  userIdForFirebaseToken(token: string): Promise<string | undefined>;
 
-  addFirebaseTokenToCache(token: string, userId: string, expiry: number)
+  addFirebaseTokenToCache(token: string, userId: string, expiry: number);
 
   // -----------------------------------------------------------------
   // WORLD PRESENCE
@@ -24,7 +25,7 @@ interface Database {
   getAllUsers(): Promise<User[]>;
 
   /** Returns a mapping from room IDs to the user IDs of each user in there */
-  allRoomOccupants(): Promise<{[roomId: string]: string[]}>;
+  allRoomOccupants(): Promise<{ [roomId: string]: string[] }>;
 
   /** Adds a user to the current list of logged-in users */
   setUserAsActive(user: User, active: boolean);
@@ -32,9 +33,9 @@ interface Database {
   /** Sets the current Unix timestamp for a user pinging in */
   setUserHeartbeat(user: User);
 
-  getUserHeartbeat (user: string): Promise<number>
+  getUserHeartbeat(user: string): Promise<number>;
 
-  getUserIdForUsername(username: string, onlineUsersOnly: boolean)
+  getUserIdForUsername(username: string, onlineUsersOnly: boolean);
 
   // -----------------------------------------------------------------
   // ROOM PRESENCE
@@ -47,10 +48,10 @@ interface Database {
   setCurrentRoomForUser(user: User, roomId: string);
 
   /** Updates the status and returns an array of userIds with active video in the given user's room */
-  updateVideoPresenceForUser (user: User, isActive: boolean): Promise<string[]>;
+  updateVideoPresenceForUser(user: User, isActive: boolean): Promise<string[]>;
 
   /* Returns a list of users currently in videochat */
-  getVideoPresenceForRoom(roomId: string): Promise<string[]>
+  getVideoPresenceForRoom(roomId: string): Promise<string[]>;
 
   // -----------------------------------------------------------------
   // USER DATA
@@ -62,18 +63,18 @@ interface Database {
   /** Overwrites the stored user profile with a new one */
   setUserProfile(userId: string, data: User): Promise<User>;
 
-  setPartialUserProfile (userId: string, user: Partial<User>): Promise<User>
+  setPartialUserProfile(userId: string, user: Partial<User>): Promise<User>;
 
   /** Sets that the user shouted right now */
   userJustShouted(user: User);
 
-  lastShoutedForUser (userId: string)
+  lastShoutedForUser(userId: string);
 
-  setModStatus(user: User, isMod: boolean)
+  setModStatus(userId: string, isMod: boolean);
 
-  banUser(user: User, isBanned: boolean)
+  banUser(user: User, isBanned: boolean);
 
-  modList(): Promise<string[]>
+  modList(): Promise<string[]>;
 
   // -----------------------------------------------------------------
   // SETTINGS DATA
@@ -83,36 +84,53 @@ interface Database {
 
   // TODO: This partial here is complicated
   // CosmosDB allows partials; Redis (the way we're using it) does not
-  setServerSettings(serverSettings: Partial<ServerSettings>): Promise<ServerSettings>;
+  setServerSettings(
+    serverSettings: Partial<ServerSettings>
+  ): Promise<ServerSettings>;
 
   // -----------------------------------------------------------------
   // POST-IT NOTES
   // -----------------------------------------------------------------
-  addRoomNote(roomId: string, note: RoomNote)
-  deleteRoomNote(roomId: string, noteId: string)
+  addRoomNote(roomId: string, note: RoomNote);
+  deleteRoomNote(roomId: string, noteId: string);
 
-  likeRoomNote(roomId: string, noteId: string, userId: string): Promise<string[]>
-  unlikeRoomNote(roomId: string, noteId: string, userId: string): Promise<string[]>
+  likeRoomNote(
+    roomId: string,
+    noteId: string,
+    userId: string
+  ): Promise<string[]>;
+  unlikeRoomNote(
+    roomId: string,
+    noteId: string,
+    userId: string
+  ): Promise<string[]>;
 
-  getRoomNotes(roomId: string): Promise<RoomNote[]>
+  getRoomNotes(roomId: string): Promise<RoomNote[]>;
 
   // -----------------------------------------------------------------
   // AVAILABILITY
   // -----------------------------------------------------------------
-  isSpaceClosed(): Promise<boolean>
-  setSpaceAvailability(open: boolean)
+  isSpaceClosed(): Promise<boolean>;
+  setSpaceAvailability(open: boolean);
 
   // If you want to notify clients a new build has been deployed,
   // you need to include the key that's hardcoded into Redis
-  webhookDeployKey()
+  webhookDeployKey();
 
-  setWebhookDeployKey(key: string)
+  setWebhookDeployKey(key: string);
 
-  addRoomActivity(roomId: string)
-  getRoomActivity(roomId: string): Promise<number>
-  allRoomActivity(): Promise<RoomActivityStatus>
+  addRoomActivity(roomId: string);
+  getRoomActivity(roomId: string): Promise<number>;
+  allRoomActivity(): Promise<RoomActivityStatus>;
+  // -----------------------------------------------------------------
+  // ROOM DATA
+  // -----------------------------------------------------------------
+  setRoomData(room: Room);
+  deleteRoomData(roomId: string): Promise<void>;
+  getRoomData(roomId: string): Promise<Room>;
+  getRoomIds(): Promise<string[]>;
 }
 
 // eslint-disable-next-line no-undef
-export default Database
-export { Redis as DB }
+export default Database;
+export { Redis as DB };

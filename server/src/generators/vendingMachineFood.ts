@@ -1,7 +1,7 @@
 var tracery = require('tracery-grammar')
 
 export const actionString = (item: string) => {
-  return `The ancient vending machine whirrs and sputters for a few seconds before spitting out ${item}.`
+  return `The vending machine whirrs and sputters for a few seconds before spitting out ${item}.`
 }
 
 export const generate = () => {
@@ -23,10 +23,31 @@ export const generate = () => {
       'a chunky',
       'a smooth',
       'a delicate',
-      'a hefty'
+      'a hefty',
+      'a perfectly cube-shaped'
     ],
     food: [
       'slime mold',
+      'pudding',
+      'snak pak',
+      'taco',
+      'piece of lutefisk',
+      'single #mnmcolors# m & m(tm)',
+      'chipotle salad bowl',
+      'off-brand hard seltzer',
+      'turkish delight',
+      'bunch of snozzberries',
+      "six-pack of 'mystery' nuggets",
+      'natto',
+      'pickle',
+      'jar of tiny pickles',
+      'kimchi',
+      'scrapple',
+      'spiedie',
+      'spätzle',
+      'Slim Jim(tm)',
+      'generic dehydrated meat tube',
+      'bowl of #cereal#',
       'meal ration',
       'apple',
       'orange',
@@ -48,7 +69,32 @@ export const generate = () => {
       'plump helmet mince',
       'bunch of grapes',
       'guava',
-      'pancake'
+      'pancake',
+      'pomegranate'
+    ],
+    mnmcolors: [
+      'red',
+      'red',
+      'red',
+      'green',
+      'green',
+      'green',
+      'orange',
+      'orange',
+      'orange',
+      'yellow',
+      'yellow',
+      'yellow',
+      'blue',
+      'blue',
+      'blue',
+      'brown',
+      'brown',
+      'brown',
+      'heliotrope',
+      'iridescent',
+      'eldritch',
+      'octarine'
     ],
     postAdjective: [
       ', still in the wrapper',
@@ -58,6 +104,16 @@ export const generate = () => {
       ', still frozen',
       ', with a sauce packet attached',
       ', with an @ on the packaging'
+    ],
+    cereal: [
+      'froot loops',
+      'golden Os',
+      'cinnamon squares',
+      'rice crispies',
+      'fruit pebbles',
+      'Monster Mash',
+      'honey crisp',
+      'Choco Chow'
     ]
   })
 

@@ -1,17 +1,18 @@
 import * as React from 'react'
 import { useState, useEffect, useContext } from 'react'
 import * as Twilio from 'twilio-video'
-import { RefreshReactAction, StartVideoChatAction, StopVideoChatAction } from '../Actions'
+import { HideModalAction, MediaReceivedSpeakingDataAction, RefreshReactAction, StartVideoChatAction, StopVideoChatAction } from '../Actions'
 
 import { DispatchContext } from '../App'
 
 import { fetchTwilioToken } from '../networking'
 import { setUpSpeechRecognizer, stopSpeechRecognizer } from '../speechRecognizer'
-import { DeviceInfo, MediaChatContext, Participant } from './mediaChatContext'
+import { DeviceInfo, MediaChatContext } from './mediaChatContext'
 import ParticipantTracks from './twilio/ParticipantTracks'
 import VideoTrack from './twilio/VideoTrack'
 
 export const TwilioChatContextProvider = (props: {
+  active: boolean;
   children: React.ReactNode;
 }) => {
   const dispatch = useContext(DispatchContext)
@@ -19,6 +20,7 @@ export const TwilioChatContextProvider = (props: {
   const [token, setToken] = useState<string>()
   const [roomId, setRoomId] = useState<string>()
   const [room, setRoom] = useState<Twilio.Room>()
+  const [joinCallFailed, setJoinCallFailed] = useState<boolean>(false)
 
   const [micEnabled, setMicEnabled] = useState<boolean>(true)
   const [cameraEnabled, setCameraEnabled] = useState<boolean>(true)
@@ -26,8 +28,8 @@ export const TwilioChatContextProvider = (props: {
   const [cameras, setCameras] = useState<DeviceInfo[]>([])
   const [mics, setMics] = useState<DeviceInfo[]>([])
 
-  const [currentMic, setCurrentMic] = useState<DeviceInfo>()
-  const [currentCamera, setCurrentCamera] = useState<DeviceInfo>()
+  const [currentMic, setCurrentMicInternal] = useState<DeviceInfo>()
+  const [currentCamera, setCurrentCameraInternal] = useState<DeviceInfo>()
 
   // These are separate from current to handle the case of the media selector
   // where we need both mic and camera enabled, but may not want to show
@@ -58,9 +60,6 @@ export const TwilioChatContextProvider = (props: {
 
   const fetchLocalVideoTrack = async () => {
     console.log('[TWILIO] Fetching local video track')
-    if (localVideoTrack) {
-      return localVideoTrack
-    }
 
     const options: Twilio.CreateLocalTrackOptions = { // TODO: Shrink size if mobile
       height: 720,
@@ -97,13 +96,13 @@ export const TwilioChatContextProvider = (props: {
     publishVideo()
   }
 
-  const publishAudio = () => {
+  const publishAudio = async () => {
     if (room) {
       dispatch(StartVideoChatAction())
       setPublishingMic(true)
       if (localAudioTrack) {
         room.localParticipant.publishTrack(localAudioTrack)
-        localAudioTrack.restart()
+        await localAudioTrack.restart()
         startTranscription()
       }
     }
@@ -117,8 +116,9 @@ export const TwilioChatContextProvider = (props: {
     setPublishingCamera(true)
 
     if (localVideoTrack) {
-      room.localParticipant.publishTrack(localVideoTrack)
       localVideoTrack.restart()
+      localVideoTrack.enable(true)
+      room.localParticipant.publishTrack(localVideoTrack)
 
       if (!localStreamView) {
         setLocalStreamView(<VideoTrack track={localVideoTrack} />)
@@ -127,27 +127,40 @@ export const TwilioChatContextProvider = (props: {
   }
 
   const unpublishMedia = () => {
+    console.log('In unpublish', localVideoTrack)
+
     dispatch(StopVideoChatAction())
     setPublishingCamera(false)
     setPublishingMic(false)
 
-    if (room) {
-      if (localAudioTrack) {
-        room.localParticipant.unpublishTrack(localAudioTrack)
-        localAudioTrack.stop()
-        stopSpeechRecognizer()
-      }
+    if (localAudioTrack) {
+      localAudioTrack.stop()
+      stopSpeechRecognizer()
 
-      if (localVideoTrack) {
-        room.localParticipant.unpublishTrack(localVideoTrack)
-        localVideoTrack.stop()
+      if (room) {
+        room.localParticipant.unpublishTrack(localAudioTrack)
       }
     }
 
-    setLocalStreamView(undefined)
+    if (localVideoTrack) {
+      // We shouldn't need to be so aggressive,
+      // but track.stop() alone isn't doing it
+      // and I can't be bothered to test which exact combo works
+      localVideoTrack.stop()
+      localVideoTrack.detach()
+      localVideoTrack.disable()
+      localVideoTrack.mediaStreamTrack.stop()
+
+      if (room) {
+        room.localParticipant.unpublishTrack(localVideoTrack)
+      }
+    }
+
+    // setLocalStreamView(undefined)
   }
 
   useEffect(() => {
+    if (!props.active) return
     console.log('[TWILIO] In useeffect for camera')
     if (!currentCamera) return
     console.log('[TWILIO] Has camera')
@@ -155,17 +168,13 @@ export const TwilioChatContextProvider = (props: {
   }, [currentCamera])
 
   useEffect(() => {
+    if (!props.active) return
     if (!currentMic) return
     fetchLocalAudioTrack()
-
-    if (micEnabled) {
-      startTranscription()
-    } else {
-      stopTranscription()
-    }
   }, [currentMic])
 
   useEffect(() => {
+    if (!props.active) return
     if (micEnabled) {
       startTranscription()
     } else {
@@ -174,6 +183,7 @@ export const TwilioChatContextProvider = (props: {
   }, [micEnabled])
 
   useEffect(() => {
+    if (!props.active) return
     console.log('[TWILIO] In token roomId useEffect')
     // The initial token might get set after calling joinCall
     // This calls joinCall when we're ready after that initial setup
@@ -200,7 +210,8 @@ export const TwilioChatContextProvider = (props: {
 
     try {
       // This is just to try to force the prompt early enough
-      await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      stream.getTracks().forEach(t => t.stop())
 
       await navigator.mediaDevices.enumerateDevices()
         .then((devices) => {
@@ -218,15 +229,21 @@ export const TwilioChatContextProvider = (props: {
           setMics(mics)
 
           console.log('[TWILIO] Setting current camera', cameras[0])
-          setCurrentCamera(cameras[0])
-          setCurrentMic(mics[0])
+          setCurrentCameraInternal(cameras[0])
+          setCurrentMicInternal(mics[0])
         })
     } catch (e) {
       console.log('[TWILIO] Error fetching media devices', e)
+      alert("We couldn't fetch your audio and video devices. This usually means another application is using your primary webcam or mic. Close anything that might be accessing them and try again. If that fails, confirm you haven't denied webcam/mic permission to this website in your browser.")
+      dispatch(HideModalAction())
     }
   }
 
   async function joinCall (roomId: string, shouldPublishTracks: boolean) {
+    if (!props.active) {
+      console.warn('joinCall was called while text-only mode was on')
+      return
+    }
     // A useEffect hook will re-call this once the token exists
     if (!token) {
       setRoomId(roomId)
@@ -257,7 +274,8 @@ export const TwilioChatContextProvider = (props: {
             }
           }
         },
-        preferredVideoCodecs: [{ codec: 'VP8', simulcast: true }]
+        preferredVideoCodecs: [{ codec: 'VP8', simulcast: true }],
+        dominantSpeaker: true
       }
 
       if (shouldPublishTracks && localVideoTrack) {
@@ -276,7 +294,19 @@ export const TwilioChatContextProvider = (props: {
       // joining the *previous* room before the Twilio.connect resolved and booted them with non-functioning tracks
       // into the new room.
       setRoom(undefined)
+      // TODO: We should have error handling for various Twilio error codes, probably.
+      // throw 'Uncomment this to simulate a Twilio failure.'
       const newRoom = await Twilio.connect(token, opts)
+      setJoinCallFailed(false)
+
+      // Note that dominantSpeaker can be set to null
+      newRoom.on('dominantSpeakerChanged', (participant: Twilio.Participant) => {
+        if (participant) {
+          dispatch(MediaReceivedSpeakingDataAction(participant.identity))
+        } else {
+          dispatch(MediaReceivedSpeakingDataAction(null))
+        }
+      })
 
       // TODO: I worry this will send a single video/audio frame if disabled on start? To test
       newRoom.localParticipant.videoTracks.forEach(publication => {
@@ -298,7 +328,7 @@ export const TwilioChatContextProvider = (props: {
       console.log('[TWILIO] In room?', newRoom)
       console.log('[TWILIO] Attached participant count:', newRoom.participants.size)
 
-      setLocalStreamView(<ParticipantTracks participant={newRoom.localParticipant}/>)
+      setLocalStreamView(<ParticipantTracks participant={newRoom.localParticipant} displayVideo={cameraEnabled} displayAudio={micEnabled} />)
       setRemoteParticipants(newRoom.participants)
 
       // Required so that when a user who is in the room begins publishing, it shows the user on the client, as the
@@ -340,6 +370,8 @@ export const TwilioChatContextProvider = (props: {
       setRoom(newRoom)
     } catch (e) {
       console.log('[TWILIO] Could not connect to room', e)
+      setLocalStreamView(null)
+      setJoinCallFailed(true)
     }
   }
 
@@ -368,30 +400,45 @@ export const TwilioChatContextProvider = (props: {
 
         // TODO: Should this function be moved elsewhere?
         // Should this logic live in a useEffect hook?
-        setCurrentCamera: (id: string) => {
-          console.log('Setting current camera', id, currentCamera, currentCamera.id)
+        setCurrentCamera: async (id: string) => {
+          console.log(`[TWILIO] Setting current camera from ${currentCamera.id} (${currentCamera.name}) to ${id}`)
           if (currentCamera && currentCamera.id !== id) {
-            console.log('Removing old camera', room)
+            console.log('[TWILIO] Removing old camera', room)
+            localVideoTrack.stop()
             if (room) {
               // TODO: room.unpublishTrack(localVideoTrack) wasn't working for some reason
               // This blunt approach works for now, but will need changing if we
               // e.g. add in screen sharing
+              /*
               room.localParticipant.videoTracks.forEach(publication => {
                 publication.unpublish()
               })
+              */
+              // TODO: There were huge issues with inconsistency with async timing issues leading to different media
+              // being shown to others versus shown to you - that is, users thought they were using the wrong camera.
+              // Booting the user out whenever they fiddle with their camera is brutal, but fixes it.
+              dispatch(StopVideoChatAction())
+              unpublishMedia()
             }
           }
-          setCurrentCamera(cameras.find(c => c.id === id))
+          setCurrentCameraInternal(cameras.find((c) => c.id === id))
+          localVideoTrack.restart()
+          return null
         },
         setCurrentMic: (id: string) => {
           if (currentMic && currentMic.id !== id) {
+            localAudioTrack.stop()
             if (room) {
-              room.localParticipant.audioTracks.forEach(publication => {
+              /* room.localParticipant.audioTracks.forEach(publication => {
                 publication.unpublish()
-              })
+              }) */
+              dispatch(StopVideoChatAction())
+              unpublishMedia()
             }
           }
-          setCurrentMic(mics.find(c => c.id === id))
+          setCurrentMicInternal(mics.find(c => c.id === id))
+          localAudioTrack.restart()
+          return null
         },
 
         localStreamView,
@@ -400,6 +447,8 @@ export const TwilioChatContextProvider = (props: {
         unpublishMedia,
         publishAudio,
 
+        inCall: !!room,
+        joinCallFailed: joinCallFailed,
         joinCall,
         leaveCall,
 

@@ -14,7 +14,11 @@ import {
   SendMessageAction,
   SpaceIsClosedAction,
   PlayerBannedAction,
-  SetKeepCameraWhenMovingAction
+  SetKeepCameraWhenMovingAction,
+  SetTextOnlyModeAction,
+  SetNumberOfFacesAction,
+  SetUseSimpleNamesAction,
+  SetCaptionsEnabledAction
 } from './Actions'
 import ProfileView from './components/ProfileView'
 import { useReducerWithThunk } from './useReducerWithThunk'
@@ -44,15 +48,17 @@ import FullRoomIndexModalView from './components/feature/FullRoomIndexViews'
 import HappeningNowView from './components/HappeningNowView'
 import VerifyEmailView from './components/VerifyEmailView'
 import EmailVerifiedView from './components/EmailVerifiedView'
+import RiddleModalView from './components/RiddleModal'
 import * as Storage from './storage'
 import { TwilioChatContextProvider } from './videochat/twilioChatContext'
-import { shouldVerifyEmail } from './firebaseUtils'
-import firebase from 'firebase/app'
-import 'firebase/auth'
+import { currentUser, onAuthenticationStateChange } from './authentication'
+import _ from 'lodash'
 
 export const DispatchContext = createContext(null)
 export const UserMapContext = createContext(null)
+export const SettingsContext = createContext(null)
 export const IsMobileContext = createContext(null)
+export const RoomDataContext = createContext(null)
 
 const App = () => {
   const [state, dispatch] = useReducerWithThunk<Action, State>(
@@ -61,57 +67,107 @@ const App = () => {
   )
 
   useEffect(() => {
-    // TODO: This logic is gnarly enough I'd love to abstract it somewhere
-    firebase.auth().onAuthStateChanged(function (user) {
+    // TODO: This flow has a lot of confusing, potentially duplicated messages that I'm not sure are necessary
+    // I (Em) started a refactor at one point, but abandoned it since it became too irrelevant from my task
+    onAuthenticationStateChange(async (user) => {
       if (!user) {
         dispatch(AuthenticateAction(undefined, undefined, undefined, undefined))
-      } else if (shouldVerifyEmail(user)) {
-        const userId = firebase.auth().currentUser.uid
-        const providerId = firebase.auth().currentUser.providerId
-        dispatch(AuthenticateAction(userId, user.email, providerId, true))
+      } else if (user.shouldVerifyEmail) {
+        const userId = user.id
+        const providerId = user.providerId
+        dispatch(AuthenticateAction(userId, userId, providerId, true))
       } else {
-        const userId = firebase.auth().currentUser.uid
-        const providerId = firebase.auth().currentUser.providerId
+        const user = currentUser()
+        const userId = user.id
+        const providerId = user.providerId
 
-        checkIsRegistered().then(async ({ registeredUsername, spaceIsClosed, isMod, isBanned }) => {
-          if (!registeredUsername) {
-            // Use email if we have it, otherwise use service's default display name (for Twitter, their handle)
-            const defaultDisplayName = user.email ? user.email : user.displayName
-            dispatch(AuthenticateAction(userId, defaultDisplayName, providerId, false))
-            return
-          }
-          dispatch(AuthenticateAction(userId, registeredUsername, providerId, false))
+        const { registeredUsername, spaceIsClosed, isMod, isBanned } = await checkIsRegistered()
+        if (!registeredUsername) {
+          // If email, use ID to not leak, otherwise use service's default display name (for Twitter, their handle)
+          const defaultDisplayName = user.email
+            ? userId
+            : user.displayName
+          dispatch(
+            AuthenticateAction(userId, defaultDisplayName, providerId, false)
+          )
+          return
+        }
 
-          if (isBanned) {
-            dispatch(PlayerBannedAction({ id: userId, username: registeredUsername, isBanned: isBanned }))
+        // TODO: I thiiiink we want this to be in an 'else'
+        dispatch(
+          AuthenticateAction(userId, registeredUsername, providerId, false)
+        )
+
+        if (isBanned) {
+          dispatch(
+            PlayerBannedAction({
+              id: userId,
+              username: registeredUsername,
+              isBanned: isBanned
+            })
+          )
+          dispatch(IsRegisteredAction())
+          return
+        }
+
+        if (spaceIsClosed) {
+          dispatch(SpaceIsClosedAction())
+
+          if (!isMod) {
+            // non-mods shouldn't subscribe to SignalR if the space is closed
             dispatch(IsRegisteredAction())
             return
           }
+        }
 
-          if (spaceIsClosed) {
-            dispatch(SpaceIsClosedAction())
+        const messageArchive = await Storage.getMessages()
+        if (messageArchive) {
+          dispatch(
+            LoadMessageArchiveAction(
+              messageArchive.messages,
+              messageArchive.whispers
+            )
+          )
+        }
 
-            if (!isMod) {
-            // non-mods shouldn't subscribe to SignalR if the space is closed
-              dispatch(IsRegisteredAction())
-              return
-            }
+        const useSimpleNames = await Storage.getUseSimpleNames()
+        dispatch(SetUseSimpleNamesAction(useSimpleNames))
+        const keepCameraWhenMoving = await Storage.getKeepCameraWhenMoving()
+        dispatch(SetKeepCameraWhenMovingAction(keepCameraWhenMoving))
+        const textOnlyMode = await Storage.getTextOnlyMode()
+        dispatch(SetTextOnlyModeAction(textOnlyMode, false))
+        const captionsEnabled = await Storage.getCaptionsEnabled()
+        dispatch(SetCaptionsEnabledAction(captionsEnabled))
+
+        dispatch(IsRegisteredAction())
+        connect(userId, dispatch)
+        getServerSettings(dispatch)
+
+        // WARNING: Prior to the "calculate number of faces for videochat" code,
+        // there was a no-op resize handler here.
+        // window.addEventListener('resize', () => {})
+        // I frankly have no idea what this was doing,
+        // and worry my changes will cause unexpected errors
+        // -Em, 10/12/2021
+        window.addEventListener('resize', () => {})
+        const onResize = () => {
+          // It seems like a smell to do this in here and have to grab into #main,
+          // but I think it's fine?
+          const VideoWidth = 180
+          const $main = document.getElementById('main')
+          // Addendum: in Firefox on Windows sometimes we get into this function with 'main' as null!
+          if ($main) {
+            const numberOfFaces = Math.floor($main.clientWidth / VideoWidth) - 1
+            dispatch(SetNumberOfFacesAction(numberOfFaces))
+          } else {
+            console.warn('Attempted to call onResize when \'main\' element was null; will default to show no faces')
           }
+        }
 
-          const messageArchive = await Storage.getMessages()
-          if (messageArchive) {
-            dispatch(LoadMessageArchiveAction(messageArchive.messages, messageArchive.whispers))
-          }
-
-          const keepCameraWhenMoving = await Storage.getKeepCameraWhenMoving()
-          dispatch(SetKeepCameraWhenMovingAction(keepCameraWhenMoving))
-
-          dispatch(IsRegisteredAction())
-          connect(userId, dispatch)
-          getServerSettings(dispatch)
-
-          window.addEventListener('resize', () => {})
-        })
+        // Our initial paint time is stupid slow
+        // but waiting a long time seems to ensure that #main exists
+        setTimeout(onResize, 2000)
+        window.addEventListener('resize', _.throttle(onResize, 100, { trailing: true }))
       }
     })
   }, [])
@@ -125,7 +181,7 @@ const App = () => {
   )
 
   // This is kind of janky!
-  if (firebase.auth().currentUser && firebase.auth().isSignInWithEmailLink(window.location.href)) {
+  if (currentUser() && currentUser().isSignInWithEmailLink(window.location.href)) {
     return <EmailVerifiedView />
   }
 
@@ -135,7 +191,7 @@ const App = () => {
 
   if (state.checkedAuthentication && state.mustVerifyEmail) {
     return <VerifyEmailView
-      userEmail={firebase.auth().currentUser.email}
+      userEmail={currentUser().email}
       dispatch={dispatch}
     />
   }
@@ -162,12 +218,19 @@ const App = () => {
     return <YouAreBannedView />
   }
 
+  // It's slightly weird we now construct this here and pass it as a prop to RoomView instead of constructing it there.
+  // Shrug, the conf is in 2 days.
   let videoChatView
-  if (state.roomData && state.roomId && state.roomData[state.roomId] && !state.roomData[state.roomId].noMediaChat) {
+  if (state.roomData && state.roomId && state.roomData[state.roomId] && state.roomData[state.roomId].mediaChat) {
     videoChatView = (
       <MediaChatView
-        peerIds={state.roomData[state.roomId].videoUsers}
-        speakingPeerIds={state.speakingPeerIds}
+        visibleSpeakers={state.visibleSpeakers}
+        currentSpeaker={state.currentSpeaker}
+        numberOfFaces={state.numberOfFaces}
+        inMediaChat={state.inMediaChat}
+        textOnlyMode={state.textOnlyMode}
+        audioOnlyMode={state.audioOnlyMode}
+        currentUser={state.userMap[state.userId]}
       />
     )
   }
@@ -191,23 +254,22 @@ const App = () => {
     case Modal.NoteWall: {
       const room = state.roomData[state.roomId]
       innerModalView = (
-        <NoteWallView notes={room.notes} noteWallData={room.noteWallData} user={state.profileData} />
+        <NoteWallView notes={room.notes} noteWallData={room.noteWallData} user={state.profileData} serverSettings={state.serverSettings} />
       )
       break
     }
     case Modal.Settings: {
-      innerModalView = <SettingsView keepCameraWhenMoving={state.keepCameraWhenMoving} />
+      innerModalView = <SettingsView keepCameraWhenMoving={state.keepCameraWhenMoving} captionsEnabled={state.captionsEnabled} />
       break
     }
     case Modal.MediaSelector: {
       console.log('Opening media selector')
+      // TODO: Fix this userIsSpeaking (it was...broken in the first place but if we're bordering we should do it here)
       innerModalView = (
         <MediaSelectorView
-          initialAudioDeviceId={state.currentAudioDeviceId}
-          initialVideoDeviceId={state.currentVideoDeviceId}
           showJoinButton={!state.inMediaChat || state.activeModalOptions.showJoinButton}
           hideVideo={state.activeModalOptions.hideVideo}
-          userIsSpeaking={state.speakingPeerIds.includes('self')}
+          userIsSpeaking={false}
           roomId={state.roomId}
           keepCameraWhenMoving={state.keepCameraWhenMoving}
         />
@@ -265,6 +327,11 @@ const App = () => {
       innerModalView = <FullRoomIndexModalView rooms={Object.values(state.roomData)}/>
       break
     }
+    case Modal.Riddles: {
+      const room = state.roomData[state.roomId]
+      innerModalView = <RiddleModalView riddles={room.riddles}/>
+      break
+    }
   }
 
   if (innerModalView) {
@@ -277,63 +344,74 @@ const App = () => {
 
   const shouldShowMenu = !isMobile || state.mobileSideMenuIsVisible
 
-  // TODO: Inject into TwilioChatContextProvider?
+  // TODO: userMapContext should actually do the thing
   return (
     <IconContext.Provider value={{ style: { verticalAlign: 'middle' } }}>
       <DispatchContext.Provider value={dispatch}>
-        <TwilioChatContextProvider>
+        <TwilioChatContextProvider active={!state.textOnlyMode}>
           <IsMobileContext.Provider value={isMobile}>
-            <UserMapContext.Provider
-              value={{ userMap: state.userMap, myId: state.userId }}
-            >
-              <div
-                id={
-                  state.visibleProfile && !isMobile ? 'app-profile-open' : 'app'
-                }
+            <SettingsContext.Provider value={{ useSimpleNames: state.useSimpleNames }}>
+              <UserMapContext.Provider
+                value={{ userMap: state.userMap, myId: state.userId }}
               >
-                {shouldShowMenu ? (
-                  <span>
-                    <SideNavView
-                      roomData={state.roomData}
-                      currentRoomId={state.roomId}
-                      username={state.userMap[state.userId].username}
-                      spaceIsClosed={state.isClosed}
-                    />
-                    {/* Once we moved the sidebar to be position:fixed, we still
-                  needed something to take up its space in the CSS grid.
-                  This should be fixable via CSS, but sigh, it's 3 days before the event */}
-                    <div id='side-nav-placeholder' />
-                  </span>
-                ) : (
-                  <button id="show-menu" onClick={showMenu}>
-                    <span role="img" aria-label="menu">
-                    🍔
-                    </span>
-                  </button>
-                )}
-                {modalView}
-                <div id="main" role="main">
-                  {videoChatView}
-                  {state.roomData[state.roomId] ? (
-                    <RoomView
-                      room={state.roomData[state.roomId]}
-                      userId={state.userId}
-                      roomData={state.roomData}
-                      inMediaChat={state.inMediaChat}
-                      keepCameraWhenMoving={state.keepCameraWhenMoving}
-                    />
-                  ) : null}
-                  <InputView
-                    prepopulated={state.prepopulatedInput}
-                    sendMessage={(message) =>
-                      dispatch(SendMessageAction(message))
+                <RoomDataContext.Provider value={state.roomData}>
+                  <div
+                    id={
+                      state.visibleProfile && !isMobile ? 'app-profile-open' : 'app'
                     }
-                  />
-                  <ChatView messages={state.messages} autoscrollChat={state.autoscrollChat} serverSettings={state.serverSettings} />
-                </div>
-                {profile}
-              </div>
-            </UserMapContext.Provider>
+                  >
+                    {shouldShowMenu ? (
+                      <span>
+                        <SideNavView
+                          roomData={state.roomData}
+                          currentRoomId={state.roomId}
+                          username={state.userMap[state.userId].username}
+                          spaceIsClosed={state.isClosed}
+                        />
+                        {/* Once we moved the sidebar to be position:fixed, we still
+                      needed something to take up its space in the CSS grid.
+                      This should be fixable via CSS, but sigh, it's 3 days before the event */}
+                        <div id="side-nav-placeholder" />
+                      </span>
+                    ) : (
+                      <button id="show-menu" onClick={showMenu}>
+                        <span role="img" aria-label="menu">
+                          🍔
+                        </span>
+                      </button>
+                    )}
+                    {modalView}
+                    <div id="main" role="main">
+                      {state.roomData[state.roomId] ? (
+                        <RoomView
+                          room={state.roomData[state.roomId]}
+                          userId={state.userId}
+                          roomData={state.roomData}
+                          inMediaChat={state.inMediaChat}
+                          keepCameraWhenMoving={state.keepCameraWhenMoving}
+                          textOnlyMode={state.textOnlyMode}
+                          mediaChatView={videoChatView}
+                          hasDismissedAModal={state.hasDismissedAModal}
+                        />
+                      ) : null}
+                      <ChatView
+                        messages={state.messages}
+                        autoscrollChat={state.autoscrollChat}
+                        serverSettings={state.serverSettings}
+                        captionsEnabled={state.captionsEnabled}
+                      />
+                      <InputView
+                        prepopulated={state.prepopulatedInput}
+                        sendMessage={(message) =>
+                          dispatch(SendMessageAction(message))
+                        }
+                      />
+                    </div>
+                    {profile}
+                  </div>
+                </RoomDataContext.Provider>
+              </UserMapContext.Provider>
+            </SettingsContext.Provider>
           </IsMobileContext.Provider>
         </TwilioChatContextProvider>
       </DispatchContext.Provider>

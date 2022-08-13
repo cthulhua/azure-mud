@@ -1,4 +1,4 @@
-import { pickUpRandomItemFromList, pickUpItem, sendChatMessage } from './networking'
+import { pickUpRandomItemFromList, pickUpItem, sendChatMessage, displayMessageFromList, updateFontReward, displayMessage } from './networking'
 import { v4 as uuidv4 } from 'uuid'
 
 export const linkActions = {
@@ -16,5 +16,38 @@ export const linkActions = {
   },
   getFortune: () => {
     sendChatMessage(uuidv4(), '/get fortune cookie')
+  },
+  readPoster: () => {
+    displayMessageFromList('motivationPosters')
+  },
+  readClosedSign: () => {
+    displayMessageFromList('closedSigns')
+  },
+  getGameRec: () => {
+    displayMessageFromList('gameRecommendations')
+  },
+  pentagramHighTech: () => {
+    pentagramAction('Impactful')
+  },
+  pentagramMinimalist: () => {
+    pentagramAction('Classic')
+  },
+  pentagramComical: () => {
+    pentagramAction('Comic')
+  },
+  pentagramNormal: () => {
+    pentagramAction('')
+  },
+  hearPickupLine: () => {
+    displayMessageFromList('pickupLines')
+  },
+  watchRobot: () => {
+    displayMessageFromList('robots')
   }
+}
+
+const pentagramAction = function (font: string) {
+  updateFontReward(uuidv4(), font)
+  sendChatMessage(uuidv4(), '/go ASCII')
+  displayMessage('You feel changed by your journey through the pentagram...')
 }

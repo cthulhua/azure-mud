@@ -2,10 +2,13 @@
 import React from 'react'
 import { Participant, Track } from 'twilio-video'
 import Publication from './Publication'
-import usePublications from './usePublications'
+import usePublications, { TrackPublication } from './usePublications'
 
 interface ParticipantTracksProps {
   participant: Participant;
+  // These handle whether the video/audio is run on the client-side only - they don't change the underlying tracks
+  displayVideo: boolean;
+  displayAudio: boolean;
   videoOnly?: boolean;
   enableScreenShare?: boolean;
   videoPriority?: Track.Priority | null;
@@ -24,24 +27,39 @@ interface ParticipantTracksProps {
 
 export default function ParticipantTracks ({
   participant,
+  displayVideo,
+  displayAudio,
   videoOnly,
   videoPriority,
   isLocalParticipant
 }: ParticipantTracksProps) {
   const publications = usePublications(participant)
+  const videoPublications = publications.filter(p => p.kind === 'video')
+  const audioPublications = publications.filter(p => p.kind === 'audio')
+
+  let finalPublications: TrackPublication[] = []
+
+  if (displayVideo && videoPublications.length > 0) {
+    finalPublications.push(videoPublications[0])
+  }
+
+  if (displayAudio) {
+    finalPublications = finalPublications.concat(audioPublications)
+  }
 
   return (
     <>
-      {publications.map(publication => (
-        <Publication
-          key={publication.kind}
-          publication={publication}
-          participant={participant}
-          isLocalParticipant={isLocalParticipant}
-          videoOnly={videoOnly}
-          videoPriority={videoPriority}
-        />
-      ))}
+      {
+        finalPublications.map(publication => {
+          return <Publication
+            key={publication.kind}
+            publication={publication}
+            isLocalParticipant={isLocalParticipant}
+            videoOnly={videoOnly}
+            videoPriority={videoPriority}
+          />
+        })
+      }
     </>
   )
 }

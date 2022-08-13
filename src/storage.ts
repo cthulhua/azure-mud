@@ -52,13 +52,21 @@ export async function setWasColoredEntering (value: boolean) {
   await localforage.setItem(wasColoredEnteringKey, value)
 }
 
-// User theme
+// Settings page
 export async function setTheme (theme: string) {
   await localforage.setItem(themeKey, theme)
 }
 
 export async function currentTheme (): Promise<string> {
   return await localforage.getItem(themeKey) || 'default'
+}
+
+export async function setUseSimpleNames (useSimpleNames: boolean) {
+  await localforage.setItem(useSimpleNamesKey, useSimpleNames)
+}
+
+export async function getUseSimpleNames (): Promise<boolean> {
+  return await localforage.getItem(useSimpleNamesKey) || false
 }
 
 // Video chat settings
@@ -68,7 +76,25 @@ export async function setKeepCameraWhenMoving (keepCameraWhenMoving: boolean) {
 
 export async function getKeepCameraWhenMoving (): Promise<boolean> {
   const keepCameraWhenMoving: boolean = await localforage.getItem(keepCameraWhenMovingKey)
-  return keepCameraWhenMoving === null ? true : keepCameraWhenMoving
+  return keepCameraWhenMoving === null ? false : keepCameraWhenMoving
+}
+
+export async function setTextOnlyMode (textOnlyMode: boolean) {
+  await localforage.setItem(textOnlyModeKey, textOnlyMode)
+}
+
+export async function getTextOnlyMode (): Promise<boolean> {
+  const textOnlyMode: boolean = await localforage.getItem(textOnlyModeKey)
+  return textOnlyMode == null ? false : textOnlyMode
+}
+
+export async function setCaptionsEnabled (enabled: boolean) {
+  await localforage.setItem(captionsEnabledKey, enabled)
+}
+
+export async function getCaptionsEnabled (): Promise<boolean> {
+  const captionsEnabled: boolean = await localforage.getItem(captionsEnabledKey)
+  return captionsEnabled == null ? false : captionsEnabled
 }
 
 // Keys
@@ -79,4 +105,7 @@ const whisperKey = 'whispers'
 const rainbowGateKey = 'FeatureRainbowGateVisited'
 const wasColoredEnteringKey = 'WasColoredEntering'
 const themeKey = 'UserSelectedTheme'
+const useSimpleNamesKey = 'UseSimpleNames'
 const keepCameraWhenMovingKey = 'KeepCameraWhenMoving'
+const textOnlyModeKey = 'TextOnlyMode'
+const captionsEnabledKey = 'CaptionsEnabled'

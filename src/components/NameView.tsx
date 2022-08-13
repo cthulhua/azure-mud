@@ -1,6 +1,6 @@
 import React, { useContext } from 'react'
 import { ContextMenu, MenuItem, ContextMenuTrigger } from 'react-contextmenu'
-import { DispatchContext, UserMapContext } from '../App'
+import { DispatchContext, SettingsContext, UserMapContext } from '../App'
 import ReactTooltip from 'react-tooltip'
 import {
   BanToggleAction,
@@ -12,8 +12,9 @@ import { User } from '../../server/src/user'
 import '../../style/nameView.css'
 import { fetchProfile } from '../networking'
 
-export default function NameView (props: { userId: string; id?: string }) {
+export default function NameView (props: { userId: string; id?: string; nowrap?: boolean }) {
   const dispatch = useContext(DispatchContext)
+  const { useSimpleNames } = useContext(SettingsContext)
   const { userMap, myId } = useContext(UserMapContext)
 
   const user: User = userMap[props.userId]
@@ -80,15 +81,20 @@ export default function NameView (props: { userId: string; id?: string }) {
   // Tooltip: If no pronouns are set, no tooltip will show
 
   var className = 'name'
-  if (user && user.nameColor) {
+  if (!useSimpleNames && user && user.nameColor) {
     className = className + ' ' + user.nameColor
   }
+  if (!useSimpleNames && user && user.fontReward) {
+    className = className + ' font-' + user.fontReward
+  }
+  // TODO: should be best handled via css
+  const customStyle = { ['whiteSpace' as any]: props.nowrap ? 'nowrap' : undefined }
   return (
-    <span className={className} data-tip={user && user.pronouns}>
+    <span className={className} data-tip={user && user.pronouns} style={customStyle} >
       <ContextMenuTrigger id={props.id} renderTag="span" holdToDisplay={0}>
         <strong className={isMod ? 'mod' : ''}>
           {isMod ? '[Mod] ' : ''}
-          {(user && user.polymorph) || ''}
+          {(!useSimpleNames && user && user.polymorph) || ''}
           {username || 'unknown'}
         </strong>
       </ContextMenuTrigger>

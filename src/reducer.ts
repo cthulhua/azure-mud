@@ -25,6 +25,7 @@ import {
   toggleUserBan,
   toggleUserMod,
   updateProfileColor,
+  updateFontReward,
   fetchProfile,
   sendCaption
 } from './networking'
@@ -44,6 +45,8 @@ export interface State {
   authenticationProvider?: string;
   mustVerifyEmail?: boolean;
 
+  hasDismissedAModal: boolean;
+
   hasRegistered: boolean;
 
   roomId?: string;
@@ -58,11 +61,24 @@ export interface State {
 
   prepopulatedInput?: string;
 
+  // Settings data
+  useSimpleNames?: boolean;
+
+  /** This is poorly named, but being "in media chat" means "is publishing audio and/or video" */
   inMediaChat: boolean;
-  currentVideoDeviceId?: string;
-  currentAudioDeviceId?: string;
-  speakingPeerIds?: string[];
   keepCameraWhenMoving?: boolean;
+  captionsEnabled: boolean,
+
+  /** text-only mode functionally overrides audio-only mode, since we don't even connect to Twilio */
+  textOnlyMode?: boolean;
+  audioOnlyMode?: boolean;
+
+  /** Tuples of userId and when they were last the visible speaker */
+  visibleSpeakers: [string, Date][]
+  currentSpeaker?: string
+
+  // How many people (other than you) to show in media chat
+  numberOfFaces: number
 
   // If this is set to something other than Modal.None, that will indicate
   // which modal view should be rendered on top of the chat view
@@ -92,15 +108,18 @@ export const defaultState: State = {
   hasRegistered: false,
   messages: [],
   whispers: [],
+  visibleSpeakers: [],
   autoscrollChat: true,
   userMap: {},
   roomData: {},
   inMediaChat: false,
-  speakingPeerIds: [],
   activeModal: Modal.None,
   activeModalOptions: {},
   isBanned: false,
-  serverSettings: DEFAULT_SERVER_SETTINGS
+  serverSettings: DEFAULT_SERVER_SETTINGS,
+  numberOfFaces: 5,
+  captionsEnabled: false,
+  hasDismissedAModal: false
 }
 
 // TODO: Split this out into separate reducers based on worldstate actions vs UI actions?
@@ -121,9 +140,10 @@ export default (oldState: State, action: Action): State => {
 
   if (action.type === ActionType.UpdatedCurrentRoom) {
     const oldRoomId = state.roomId
-    state.roomId = action.value
+    state.roomId = action.value.roomId
+    state.roomData = { ...state.roomData, ...action.value.roomData }
 
-    if (state.roomId === 'entryway') {
+    if (state.roomId === 'entryway' || !state.hasDismissedAModal) {
       // This will show any time anyone reloads into the entryway, which
       // might be slightly annoying for e.g. greeters.
       // Given our time constraints, that seems an acceptable tradeoff
@@ -133,8 +153,8 @@ export default (oldState: State, action: Action): State => {
 
     // Add a local "you have moved to X room" message
     // Don't display if we're in the same room (issue 162)
-    if (state.roomData && state.roomData[action.value]) {
-      const room = state.roomData[action.value]
+    if (state.roomData && state.roomData[action.value.roomId]) {
+      const room = state.roomData[action.value.roomId]
       if (state.roomId !== oldRoomId) {
         addMessage(state, createMovedRoomMessage(room.shortName))
       } else {
@@ -291,13 +311,47 @@ export default (oldState: State, action: Action): State => {
     updateProfileColor(state.userId, action.color)
   }
 
+  if (action.type === ActionType.UpdateFontReward) {
+    state.userMap[state.userId].fontReward = action.font
+
+    // I'm following the pattern of the set colour but... I don't think the user sees these message, and they aren't errors, why do we do this?
+    if (action.font) {
+      addMessage(state, createErrorMessage('You feel invigorated, and like you\'ve become more... ' + action.font))
+    } else {
+      addMessage(state, createErrorMessage('You feel yourself return to your normal state, like you never went riddling to begin with.'))
+    }
+
+    updateFontReward(state.userId, action.font)
+  }
+
   if (action.type === ActionType.Error) {
     addMessage(state, createErrorMessage(action.value))
   }
 
-  // see audioAnalysis.ts for context
   if (action.type === ActionType.MediaReceivedSpeakingData) {
-    state.speakingPeerIds = action.value
+    state.currentSpeaker = action.value
+    if (action.value !== null && action.value !== state.userId) {
+      if (!state.visibleSpeakers.find(([userId, _]) => userId === action.value)) {
+        if (state.visibleSpeakers.length < state.numberOfFaces) {
+          state.visibleSpeakers.push([action.value, new Date()])
+        } else {
+          // Find the oldest speaker and replace them
+          let oldestIndex = -1
+          let oldestTime = new Date()
+          for (let i = 0; i < state.visibleSpeakers.length; i++) {
+            if (state.visibleSpeakers[i][1] < oldestTime) {
+              oldestTime = state.visibleSpeakers[i][1]
+              oldestIndex = i
+            }
+          }
+          state.visibleSpeakers[oldestIndex] = [action.value, new Date()]
+        }
+      }
+    }
+  }
+
+  if (action.type === ActionType.SetNumberOfFaces) {
+    state.numberOfFaces = action.value
   }
 
   if (action.type === ActionType.StartVideoChat) {
@@ -340,6 +394,7 @@ export default (oldState: State, action: Action): State => {
         if (userId) {
           const whisperMessage = createWhisperMessage(userId, message, true)
           addMessage(state, whisperMessage)
+          saveWhisper(state, whisperMessage)
         }
       }
     } else if (beginsWithSlash && matching.type === SlashCommandType.Help) {
@@ -369,6 +424,7 @@ export default (oldState: State, action: Action): State => {
 
   if (action.type === ActionType.HideModalAction) {
     state.activeModal = Modal.None
+    state.hasDismissedAModal = true
   }
 
   if (action.type === ActionType.ShowProfile) {
@@ -406,9 +462,32 @@ export default (oldState: State, action: Action): State => {
     state.autoscrollChat = true
   }
 
+  if (action.type === ActionType.SetUseSimpleNames) {
+    state.useSimpleNames = action.value
+    Storage.setUseSimpleNames(action.value)
+  }
+
   if (action.type === ActionType.SetKeepCameraWhenMoving) {
     state.keepCameraWhenMoving = action.value
     Storage.setKeepCameraWhenMoving(action.value)
+  }
+
+  if (action.type === ActionType.SetCaptionsEnabled) {
+    state.captionsEnabled = action.value
+    Storage.setCaptionsEnabled(action.value)
+  }
+
+  if (action.type === ActionType.SetTextOnlyMode) {
+    state.textOnlyMode = action.textOnlyMode
+    if (!action.refresh) {
+      Storage.setTextOnlyMode(action.textOnlyMode)
+    } else {
+      Storage.setTextOnlyMode(action.textOnlyMode).then(() => window.location.reload())
+    }
+  }
+
+  if (action.type === ActionType.SetAudioOnlyMode) {
+    state.audioOnlyMode = action.value
   }
 
   if (action.type === ActionType.Authenticate) {
@@ -446,7 +525,7 @@ export default (oldState: State, action: Action): State => {
 
   if (action.type === ActionType.LoadMessageArchive) {
     state.messages = action.messages
-    state.whispers = action.whispers
+    state.whispers = action.whispers || []
   }
 
   // Notes
