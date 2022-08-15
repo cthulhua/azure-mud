@@ -67,8 +67,8 @@ export default function MenuButtonView (props: { username: string, spaceIsClosed
         <MenuItem onClick={showProfile}>View Profile</MenuItem>
         <MenuItem onClick={showProfileEdit}>Edit Profile</MenuItem>
         <MenuItem onClick={showSettings}>Settings & Theme</MenuItem>
-        {isMod ? toggleSpaceItem : null}
-        {isMod ? <MenuItem onClick={showServerSettings}>Server Settings</MenuItem> : null}
+        toggleSpaceItem
+        <MenuItem onClick={showServerSettings}>Server Settings</MenuItem>
         <MenuItem onClick={logOut}>Log Out</MenuItem>
       </ContextMenu>
     </div>
