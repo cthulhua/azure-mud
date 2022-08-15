@@ -44,7 +44,7 @@ const connect: AuthenticatedEndpointFunction = async (user: User, inputs: any, l
 
   // TODO: The thing that dynamically fetches room data should
   // be smart enough to include roomNotes if necessary
-  if (room.hasNoteWall) {
+  if (!!room && !!room.hasNoteWall) {
     response.roomNotes = await DB.getRoomNotes(user.roomId)
   }
 
