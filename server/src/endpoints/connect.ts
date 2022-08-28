@@ -6,6 +6,7 @@ import { RoomResponse } from '../types'
 import { User, isMod, minimizeUser } from '../user'
 import { AuthenticatedEndpointFunction, LogFn, Result } from '../endpoint'
 import DB from '../redis'
+import { UnlockableBadges } from '../badges'
 
 // TODO: We are currently including all static room data in this initial request
 // That may not be eventually what we want
@@ -42,12 +43,13 @@ const connect: AuthenticatedEndpointFunction = async (user: User, inputs: any, l
     roomData: { ...staticRoomData, [user.roomId]: room },
     // TODO: Have a function to delete the keys we don't need
     profile: user,
-    roomActivityStatus
+    roomActivityStatus,
+    unlockableBadges: UnlockableBadges
   }
 
   // TODO: The thing that dynamically fetches room data should
   // be smart enough to include roomNotes if necessary
-  if (room.hasNoteWall) {
+  if (!!room && !!room.hasNoteWall) {
     response.roomNotes = await DB.getRoomNotes(user.roomId)
   }
 

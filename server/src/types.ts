@@ -1,6 +1,7 @@
 import { Room } from './rooms'
 import { User, MinimalUser, PublicUser } from './user'
 import { RoomNote } from './roomNote'
+import { Badge } from './badges'
 
 export interface HappeningNowEntry {
   text: string,
@@ -55,7 +56,7 @@ export interface RoomResponse {
   presenceData?: { [roomId: string]: string[] };
   users?: { [userId: string]: MinimalUser };
   roomData?: { [roomId: string]: Room };
-  profile?: PublicUser;
+  profile?: User;
   roomNotes?: RoomNote[];
   roomActivityStatus?: RoomActivityStatus
 }
