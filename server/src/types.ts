@@ -58,7 +58,8 @@ export interface RoomResponse {
   roomData?: { [roomId: string]: Room };
   profile?: User;
   roomNotes?: RoomNote[];
-  roomActivityStatus?: RoomActivityStatus
+  roomActivityStatus?: RoomActivityStatus,
+  unlockableBadges?: Badge[]
 }
 
 export interface RoomActivityStatus {

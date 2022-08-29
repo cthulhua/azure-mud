@@ -360,7 +360,7 @@ const Redis: RedisInternal = {
   },
 
   async allRoomActivity(): Promise<RoomActivityStatus> {
-    const allRoomIds = Object.keys(roomData);
+    const allRoomIds = await Redis.getRoomIds();
     const data = {};
     await Promise.all(
       allRoomIds.map(async (id) => {
