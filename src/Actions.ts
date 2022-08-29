@@ -74,69 +74,69 @@ export type Action =
 
 export enum ActionType {
   // Server-driven action
-  ReceivedMyProfile = "RECEIVED_MY_PROFILE",
-  ReceivedServerSettings = "RECEIVED_SERVER_SETTINGS",
-  UpdatedCurrentRoom = "UPDATED_CURRENT_ROOM",
-  UpdatedRoomData = "UPDATED_ROOM_DATA",
-  UpdatedPresence = "UPDATED_PRESENCE",
-  PlayerConnected = "PLAYER_CONNECTED",
-  PlayerDisconnected = "PLAYER_DISCONNECTED",
-  ChatMessage = "CHAT_MESSAGE",
-  CaptionMessage = "CAPTION_MESSAGE",
-  ModMessage = "MOD_MESSAGE",
-  DeleteMessage = "DELETE_MESSAGE",
-  Whisper = "WHISPER",
-  Shout = "SHOUT",
-  Emote = "EMOTE",
-  Dance = "DANCE",
-  PlayerEntered = "PLAYER_ENTERED",
-  PlayerLeft = "PLAYER_LEFT",
-  Error = "ERROR",
-  UserMap = "USER_MAP",
-  PlayerBanned = "PLAYER_BANNED",
-  PlayerUnbanned = "PLAYER_UNBANNED",
-  UpdateProfileColor = "UPDATE_PROFILE_COLOR",
-  RoomActivityUpdated = "ROOM_ACTIVITY_UPDATED",
-  UpdateFontReward = "UPDATE_FONT_REWARD",
+  ReceivedMyProfile = 'RECEIVED_MY_PROFILE',
+  ReceivedServerSettings = 'RECEIVED_SERVER_SETTINGS',
+  UpdatedCurrentRoom = 'UPDATED_CURRENT_ROOM',
+  UpdatedRoomData = 'UPDATED_ROOM_DATA',
+  UpdatedPresence = 'UPDATED_PRESENCE',
+  PlayerConnected = 'PLAYER_CONNECTED',
+  PlayerDisconnected = 'PLAYER_DISCONNECTED',
+  ChatMessage = 'CHAT_MESSAGE',
+  CaptionMessage = 'CAPTION_MESSAGE',
+  ModMessage = 'MOD_MESSAGE',
+  DeleteMessage = 'DELETE_MESSAGE',
+  Whisper = 'WHISPER',
+  Shout = 'SHOUT',
+  Emote = 'EMOTE',
+  Dance = 'DANCE',
+  PlayerEntered = 'PLAYER_ENTERED',
+  PlayerLeft = 'PLAYER_LEFT',
+  Error = 'ERROR',
+  UserMap = 'USER_MAP',
+  PlayerBanned = 'PLAYER_BANNED',
+  PlayerUnbanned = 'PLAYER_UNBANNED',
+  UpdateProfileColor = 'UPDATE_PROFILE_COLOR',
+  RoomActivityUpdated = 'ROOM_ACTIVITY_UPDATED',
+  UpdateFontReward = 'UPDATE_FONT_REWARD',
   // WebRTC
-  StopVideoChat = "STOP_VIDEO_CHAT",
-  StartVideoChat = "START_VIDEO_CHAT",
-  MediaReceivedSpeakingData = "MEDIA_RECEIVED_SPEAKING_DATA",
+  StopVideoChat = 'STOP_VIDEO_CHAT',
+  StartVideoChat = 'START_VIDEO_CHAT',
+  MediaReceivedSpeakingData = 'MEDIA_RECEIVED_SPEAKING_DATA',
   // UI actions
-  RefreshReact = "REFRESH_REACT",
-  SendMessage = "SEND_MESSAGE",
-  SendCaption = "SEND_CAPTION",
-  SetName = "SET_NAME",
-  StartWhisper = "START_WHISPER",
-  ShowProfile = "SHOW_PROFILE",
-  HideProfile = "HIDE_PROFILE",
-  ShowModal = "SHOW_MODAL",
-  ShowModalWithOptions = "SHOW_MODAL_WITH_OPTIONS",
-  ShowSideMenu = "SHOW_SIDE_MENU",
-  HideSideMenu = "HIDE_SIDE_MENU",
-  DeactivateAutoscroll = "DEACTIVATE_AUTOSCROLL",
-  ActivateAutoscroll = "ACTIVATE_AUTOSCROLL",
-  SetUseSimpleNames = "SET_USE_SIMPLE_NAMES",
-  SetKeepCameraWhenMoving = "SET_KEEP_CAMERA_WHEN_MOVING",
-  SetTextOnlyMode = "SET_TEXT_ONLY_MODE",
-  SetAudioOnlyMode = "SET_AUDIO_ONLY_MODE",
-  SetNumberOfFaces = "SET_NUMBER_OF_FACES",
-  SetCaptionsEnabled = "SET_CAPTIONS_ENABLED",
+  RefreshReact = 'REFRESH_REACT',
+  SendMessage = 'SEND_MESSAGE',
+  SendCaption = 'SEND_CAPTION',
+  SetName = 'SET_NAME',
+  StartWhisper = 'START_WHISPER',
+  ShowProfile = 'SHOW_PROFILE',
+  HideProfile = 'HIDE_PROFILE',
+  ShowModal = 'SHOW_MODAL',
+  ShowModalWithOptions = 'SHOW_MODAL_WITH_OPTIONS',
+  ShowSideMenu = 'SHOW_SIDE_MENU',
+  HideSideMenu = 'HIDE_SIDE_MENU',
+  DeactivateAutoscroll = 'DEACTIVATE_AUTOSCROLL',
+  ActivateAutoscroll = 'ACTIVATE_AUTOSCROLL',
+  SetUseSimpleNames = 'SET_USE_SIMPLE_NAMES',
+  SetKeepCameraWhenMoving = 'SET_KEEP_CAMERA_WHEN_MOVING',
+  SetTextOnlyMode = 'SET_TEXT_ONLY_MODE',
+  SetAudioOnlyMode = 'SET_AUDIO_ONLY_MODE',
+  SetNumberOfFaces = 'SET_NUMBER_OF_FACES',
+  SetCaptionsEnabled = 'SET_CAPTIONS_ENABLED',
   //
-  Authenticate = "AUTHENTICATE",
-  IsRegistered = "IS_REGISTERED",
-  BanToggle = "BAN_TOGGLE",
-  ModToggle = "MOD_TOGGLE",
-  LoadMessageArchive = "LOAD_MESSAGE_ARCHIVE",
+  Authenticate = 'AUTHENTICATE',
+  IsRegistered = 'IS_REGISTERED',
+  BanToggle = 'BAN_TOGGLE',
+  ModToggle = 'MOD_TOGGLE',
+  LoadMessageArchive = 'LOAD_MESSAGE_ARCHIVE',
   // Note Wall
-  NoteAdd = "NOTE_ADD",
-  NoteRemove = "NOTE_REMOVE",
-  NoteUpdateLikes = "NOTE_UPDATE_LIKES",
-  NoteUpdateRoom = "NOTE_UPDATE_ROOM",
-  HideModalAction = "HIDE_MODAL",
+  NoteAdd = 'NOTE_ADD',
+  NoteRemove = 'NOTE_REMOVE',
+  NoteUpdateLikes = 'NOTE_UPDATE_LIKES',
+  NoteUpdateRoom = 'NOTE_UPDATE_ROOM',
+  HideModalAction = 'HIDE_MODAL',
 
-  SpaceIsClosed = "SPACE_IS_CLOSED",
-  SpaceOpenedOrClosed = "SPACE_OPENED_OR_CLOSED",
+  SpaceIsClosed = 'SPACE_IS_CLOSED',
+  SpaceOpenedOrClosed = 'SPACE_OPENED_OR_CLOSED',
 
   CommandMessage = 'COMMAND_MESSAGE',
 
@@ -156,9 +156,9 @@ export const ReceivedMyProfileAction = (
 ): ReceivedMyProfileAction => {
   return {
     type: ActionType.ReceivedMyProfile,
-    value: user,
-  };
-};
+    value: user
+  }
+}
 
 interface ReceivedServerSettingsAction {
   type: ActionType.ReceivedServerSettings;
@@ -170,9 +170,9 @@ export const ReceivedServerSettingsAction = (
 ): ReceivedServerSettingsAction => {
   return {
     type: ActionType.ReceivedServerSettings,
-    value: serverSettings,
-  };
-};
+    value: serverSettings
+  }
+}
 
 interface UpdatedCurrentRoomAction {
   type: ActionType.UpdatedCurrentRoom;
@@ -188,9 +188,9 @@ export const UpdatedCurrentRoomAction = (
 ): UpdatedCurrentRoomAction => {
   return {
     type: ActionType.UpdatedCurrentRoom,
-    value: { roomId, roomData },
-  };
-};
+    value: { roomId, roomData }
+  }
+}
 
 interface UpdatedRoomDataAction {
   type: ActionType.UpdatedRoomData;
@@ -202,9 +202,9 @@ export const UpdatedRoomDataAction = (roomData: {
 }): UpdatedRoomDataAction => {
   return {
     type: ActionType.UpdatedRoomData,
-    value: roomData,
-  };
-};
+    value: roomData
+  }
+}
 
 interface UpdatedPresenceAction {
   type: ActionType.UpdatedPresence;
@@ -216,9 +216,9 @@ export const UpdatedPresenceAction = (data: {
 }): UpdatedPresenceAction => {
   return {
     type: ActionType.UpdatedPresence,
-    value: data,
-  };
-};
+    value: data
+  }
+}
 
 interface PlayerConnectedAction {
   type: ActionType.PlayerConnected;
@@ -230,9 +230,9 @@ export const PlayerConnectedAction = (
 ): PlayerConnectedAction => {
   return {
     type: ActionType.PlayerConnected,
-    value: user,
-  };
-};
+    value: user
+  }
+}
 
 interface PlayerDisconnectedAction {
   type: ActionType.PlayerDisconnected;
@@ -244,9 +244,9 @@ export const PlayerDisconnectedAction = (
 ): PlayerDisconnectedAction => {
   return {
     type: ActionType.PlayerDisconnected,
-    value: name,
-  };
-};
+    value: name
+  }
+}
 
 interface ChatMessageAction {
   type: ActionType.ChatMessage;
@@ -264,9 +264,9 @@ export const ChatMessageAction = (
 ): ChatMessageAction => {
   return {
     type: ActionType.ChatMessage,
-    value: { messageId, name, message },
-  };
-};
+    value: { messageId, name, message }
+  }
+}
 
 interface CaptionMessageAction {
   type: ActionType.CaptionMessage;
@@ -284,9 +284,9 @@ export const CaptionMessageAction = (
 ): CaptionMessageAction => {
   return {
     type: ActionType.CaptionMessage,
-    value: { messageId, name, message },
-  };
-};
+    value: { messageId, name, message }
+  }
+}
 
 interface WhisperAction {
   type: ActionType.Whisper;
@@ -299,9 +299,9 @@ interface WhisperAction {
 export const WhisperAction = (name: string, message: string): WhisperAction => {
   return {
     type: ActionType.Whisper,
-    value: { name, message },
-  };
-};
+    value: { name, message }
+  }
+}
 
 interface ModMessageAction {
   type: ActionType.ModMessage;
@@ -317,9 +317,9 @@ export const ModMessageAction = (
 ): ModMessageAction => {
   return {
     type: ActionType.ModMessage,
-    value: { name, message },
-  };
-};
+    value: { name, message }
+  }
+}
 
 interface DeleteMessageAction {
   type: ActionType.DeleteMessage;
@@ -335,9 +335,9 @@ export const DeleteMessageAction = (
 ): DeleteMessageAction => {
   return {
     type: ActionType.DeleteMessage,
-    value: { modId, targetMessageId },
-  };
-};
+    value: { modId, targetMessageId }
+  }
+}
 
 export const ShoutAction = (
   messageId: string,
@@ -346,9 +346,9 @@ export const ShoutAction = (
 ): ShoutAction => {
   return {
     type: ActionType.Shout,
-    value: { messageId, name, message },
-  };
-};
+    value: { messageId, name, message }
+  }
+}
 
 interface ShoutAction {
   type: ActionType.Shout;
@@ -375,9 +375,9 @@ export const EmoteAction = (
 ): EmoteAction => {
   return {
     type: ActionType.Emote,
-    value: { messageId, name, message },
-  };
-};
+    value: { messageId, name, message }
+  }
+}
 
 interface DanceAction {
   type: ActionType.Dance;
@@ -395,9 +395,9 @@ export const DanceAction = (
 ): DanceAction => {
   return {
     type: ActionType.Dance,
-    value: { messageId, name, message },
-  };
-};
+    value: { messageId, name, message }
+  }
+}
 
 interface PlayerEnteredAction {
   type: ActionType.PlayerEntered;
@@ -415,9 +415,9 @@ export const PlayerEnteredAction = (
 ): PlayerEnteredAction => {
   return {
     type: ActionType.PlayerEntered,
-    value: { name, fromId, fromName },
-  };
-};
+    value: { name, fromId, fromName }
+  }
+}
 
 interface PlayerLeftAction {
   type: ActionType.PlayerLeft;
@@ -435,9 +435,9 @@ export const PlayerLeftAction = (
 ): PlayerLeftAction => {
   return {
     type: ActionType.PlayerLeft,
-    value: { name, toId, toName },
-  };
-};
+    value: { name, toId, toName }
+  }
+}
 
 interface UserMapAction {
   type: ActionType.UserMap;
@@ -449,9 +449,9 @@ export const UserMapAction = (map: {
 }): UserMapAction => {
   return {
     type: ActionType.UserMap,
-    value: map,
-  };
-};
+    value: map
+  }
+}
 
 interface PlayerBannedAction {
   type: ActionType.PlayerBanned;
@@ -461,9 +461,9 @@ interface PlayerBannedAction {
 export const PlayerBannedAction = (user: MinimalUser): PlayerBannedAction => {
   return {
     type: ActionType.PlayerBanned,
-    value: user,
-  };
-};
+    value: user
+  }
+}
 
 interface PlayerUnbannedAction {
   type: ActionType.PlayerUnbanned;
@@ -475,9 +475,9 @@ export const PlayerUnbannedAction = (
 ): PlayerUnbannedAction => {
   return {
     type: ActionType.PlayerUnbanned,
-    value: user,
-  };
-};
+    value: user
+  }
+}
 
 interface UpdateProfileColorAction {
   type: ActionType.UpdateProfileColor;
@@ -489,9 +489,9 @@ export const UpdateProfileColorAction = (
 ): UpdateProfileColorAction => {
   return {
     type: ActionType.UpdateProfileColor,
-    color: color,
-  };
-};
+    color: color
+  }
+}
 
 interface UpdateFontRewardAction {
   type: ActionType.UpdateFontReward;
@@ -503,9 +503,9 @@ export const UpdateFontRewardAction = (
 ): UpdateFontRewardAction => {
   return {
     type: ActionType.UpdateFontReward,
-    font: font,
-  };
-};
+    font: font
+  }
+}
 
 interface MediaReceivedSpeakingDataAction {
   type: ActionType.MediaReceivedSpeakingData;
@@ -517,25 +517,25 @@ export const MediaReceivedSpeakingDataAction = (
 ): MediaReceivedSpeakingDataAction => {
   return {
     type: ActionType.MediaReceivedSpeakingData,
-    value: participantId,
-  };
-};
+    value: participantId
+  }
+}
 
 interface StopVideoChatAction {
   type: ActionType.StopVideoChat;
 }
 
 export const StopVideoChatAction = (): StopVideoChatAction => {
-  return { type: ActionType.StopVideoChat };
-};
+  return { type: ActionType.StopVideoChat }
+}
 
 interface StartVideoChatAction {
   type: ActionType.StartVideoChat;
 }
 
 export const StartVideoChatAction = (): StartVideoChatAction => {
-  return { type: ActionType.StartVideoChat };
-};
+  return { type: ActionType.StartVideoChat }
+}
 
 interface ErrorAction {
   type: ActionType.Error;
@@ -545,9 +545,9 @@ interface ErrorAction {
 export const ErrorAction = (error: string): ErrorAction => {
   return {
     type: ActionType.Error,
-    value: error,
-  };
-};
+    value: error
+  }
+}
 
 interface RoomActivityUpdatedAction {
   type: ActionType.RoomActivityUpdated;
@@ -559,9 +559,9 @@ export const RoomActivityUpdatedAction = (
 ): RoomActivityUpdatedAction => {
   return {
     type: ActionType.RoomActivityUpdated,
-    value: activeRooms,
-  };
-};
+    value: activeRooms
+  }
+}
 // UI Actions
 
 // HACK ALERT: Used to force a re-render, but ideally the data relevant to the re-render should be tied to the action.
@@ -572,9 +572,9 @@ interface RefreshReactAction {
 
 export const RefreshReactAction = (): RefreshReactAction => {
   return {
-    type: ActionType.RefreshReact,
-  };
-};
+    type: ActionType.RefreshReact
+  }
+}
 
 interface SendMessageAction {
   type: ActionType.SendMessage;
@@ -584,9 +584,9 @@ interface SendMessageAction {
 export const SendCaptionAction = (message: string): SendCaptionAction => {
   return {
     type: ActionType.SendCaption,
-    value: message,
-  };
-};
+    value: message
+  }
+}
 interface SendCaptionAction {
   type: ActionType.SendCaption;
   value: string;
@@ -595,9 +595,9 @@ interface SendCaptionAction {
 export const SendMessageAction = (message: string): SendMessageAction => {
   return {
     type: ActionType.SendMessage,
-    value: message,
-  };
-};
+    value: message
+  }
+}
 
 interface SetNameAction {
   type: ActionType.SetName;
@@ -607,9 +607,9 @@ interface SetNameAction {
 export const SetNameAction = (name: string): SetNameAction => {
   return {
     type: ActionType.SetName,
-    value: name,
-  };
-};
+    value: name
+  }
+}
 
 interface StartWhisperAction {
   type: ActionType.StartWhisper;
@@ -617,16 +617,16 @@ interface StartWhisperAction {
 }
 
 export const StartWhisperAction = (name: string): StartWhisperAction => {
-  return { type: ActionType.StartWhisper, value: name };
-};
+  return { type: ActionType.StartWhisper, value: name }
+}
 
 interface HideProfileAction {
   type: ActionType.HideProfile;
 }
 
 export const HideProfileAction = (): HideProfileAction => {
-  return { type: ActionType.HideProfile };
-};
+  return { type: ActionType.HideProfile }
+}
 
 interface ShowProfileAction {
   type: ActionType.ShowProfile;
@@ -636,9 +636,9 @@ interface ShowProfileAction {
 export const ShowProfileAction = (user: PublicUser): ShowProfileAction => {
   return {
     type: ActionType.ShowProfile,
-    value: user,
-  };
-};
+    value: user
+  }
+}
 
 interface ShowModalAction {
   type: ActionType.ShowModal;
@@ -648,9 +648,9 @@ interface ShowModalAction {
 export const ShowModalAction = (modal: Modal): ShowModalAction => {
   return {
     type: ActionType.ShowModal,
-    value: modal,
-  };
-};
+    value: modal
+  }
+}
 
 interface ShowModalWithOptionsAction {
   type: ActionType.ShowModalWithOptions;
@@ -666,17 +666,17 @@ export const ShowModalWithOptionsAction = (
 ): ShowModalWithOptionsAction => {
   return {
     type: ActionType.ShowModalWithOptions,
-    value: { modal, options },
-  };
-};
+    value: { modal, options }
+  }
+}
 
 interface HideModalAction {
   type: ActionType.HideModalAction;
 }
 
 export const HideModalAction = (): HideModalAction => {
-  return { type: ActionType.HideModalAction };
-};
+  return { type: ActionType.HideModalAction }
+}
 
 interface AuthenticateAction {
   type: ActionType.Authenticate;
@@ -693,32 +693,32 @@ interface ShowSideMenuAction {
 }
 
 export const ShowSideMenuAction = (): ShowSideMenuAction => {
-  return { type: ActionType.ShowSideMenu };
-};
+  return { type: ActionType.ShowSideMenu }
+}
 
 interface HideSideMenuAction {
   type: ActionType.HideSideMenu;
 }
 
 export const HideSideMenuAction = (): HideSideMenuAction => {
-  return { type: ActionType.HideSideMenu };
-};
+  return { type: ActionType.HideSideMenu }
+}
 
 interface DeactivateAutoscrollAction {
   type: ActionType.DeactivateAutoscroll;
 }
 
 export const DeactivateAutoscrollAction = (): DeactivateAutoscrollAction => {
-  return { type: ActionType.DeactivateAutoscroll };
-};
+  return { type: ActionType.DeactivateAutoscroll }
+}
 
 interface ActivateAutoscrollAction {
   type: ActionType.ActivateAutoscroll;
 }
 
 export const ActivateAutoscrollAction = (): ActivateAutoscrollAction => {
-  return { type: ActionType.ActivateAutoscroll };
-};
+  return { type: ActionType.ActivateAutoscroll }
+}
 
 interface SetUseSimpleNamesAction {
   type: ActionType.SetUseSimpleNames;
@@ -728,8 +728,8 @@ interface SetUseSimpleNamesAction {
 export const SetUseSimpleNamesAction = (
   useSimpleNames: boolean
 ): SetUseSimpleNamesAction => {
-  return { type: ActionType.SetUseSimpleNames, value: useSimpleNames };
-};
+  return { type: ActionType.SetUseSimpleNames, value: useSimpleNames }
+}
 
 interface SetKeepCameraWhenMovingAction {
   type: ActionType.SetKeepCameraWhenMoving;
@@ -741,9 +741,9 @@ export const SetKeepCameraWhenMovingAction = (
 ): SetKeepCameraWhenMovingAction => {
   return {
     type: ActionType.SetKeepCameraWhenMoving,
-    value: keepCameraWhenMoving,
-  };
-};
+    value: keepCameraWhenMoving
+  }
+}
 
 interface SetTextOnlyModeAction {
   type: ActionType.SetTextOnlyMode;
@@ -758,9 +758,9 @@ export const SetTextOnlyModeAction = (
   return {
     type: ActionType.SetTextOnlyMode,
     textOnlyMode: textOnlyMode,
-    refresh: refresh,
-  };
-};
+    refresh: refresh
+  }
+}
 
 interface SetAudioOnlyModeAction {
   type: ActionType.SetAudioOnlyMode;
@@ -772,9 +772,9 @@ export const SetAudioOnlyModeAction = (
 ): SetAudioOnlyModeAction => {
   return {
     type: ActionType.SetAudioOnlyMode,
-    value: enable,
-  };
-};
+    value: enable
+  }
+}
 interface SetCaptionsEnabledAction {
   type: ActionType.SetCaptionsEnabled;
   value: boolean;
@@ -785,9 +785,9 @@ export const SetCaptionsEnabledAction = (
 ): SetCaptionsEnabledAction => {
   return {
     type: ActionType.SetCaptionsEnabled,
-    value: enable,
-  };
-};
+    value: enable
+  }
+}
 
 interface SetNumberOfFacesAction {
   type: ActionType.SetNumberOfFaces;
@@ -797,9 +797,9 @@ interface SetNumberOfFacesAction {
 export const SetNumberOfFacesAction = (num: number): SetNumberOfFacesAction => {
   return {
     type: ActionType.SetNumberOfFaces,
-    value: num,
-  };
-};
+    value: num
+  }
+}
 
 export const AuthenticateAction = (
   userId: string | undefined,
@@ -809,17 +809,17 @@ export const AuthenticateAction = (
 ): AuthenticateAction => {
   return {
     type: ActionType.Authenticate,
-    value: { userId, name, provider, mustVerifyEmail },
-  };
-};
+    value: { userId, name, provider, mustVerifyEmail }
+  }
+}
 
 interface IsRegisteredAction {
   type: ActionType.IsRegistered;
 }
 
 export const IsRegisteredAction = (): IsRegisteredAction => {
-  return { type: ActionType.IsRegistered };
-};
+  return { type: ActionType.IsRegistered }
+}
 
 interface BanToggleAction {
   type: ActionType.BanToggle;
@@ -827,8 +827,8 @@ interface BanToggleAction {
 }
 
 export const BanToggleAction = (userId: string): BanToggleAction => {
-  return { type: ActionType.BanToggle, value: userId };
-};
+  return { type: ActionType.BanToggle, value: userId }
+}
 
 interface ModToggleAction {
   type: ActionType.ModToggle;
@@ -836,8 +836,8 @@ interface ModToggleAction {
 }
 
 export const ModToggleAction = (userId: string): ModToggleAction => {
-  return { type: ActionType.ModToggle, value: userId };
-};
+  return { type: ActionType.ModToggle, value: userId }
+}
 
 interface LoadMessageArchiveAction {
   type: ActionType.LoadMessageArchive;
@@ -852,9 +852,9 @@ export const LoadMessageArchiveAction = (
   return {
     type: ActionType.LoadMessageArchive,
     messages: messages,
-    whispers: whispers,
-  };
-};
+    whispers: whispers
+  }
+}
 
 interface NoteAddAction {
   type: ActionType.NoteAdd;
@@ -865,8 +865,8 @@ export const NoteAddAction = (
   roomId: string,
   note: RoomNote
 ): NoteAddAction => {
-  return { type: ActionType.NoteAdd, value: { roomId, note } };
-};
+  return { type: ActionType.NoteAdd, value: { roomId, note } }
+}
 
 interface NoteRemoveAction {
   type: ActionType.NoteRemove;
@@ -877,8 +877,8 @@ export const NoteRemoveAction = (
   roomId: string,
   noteId: string
 ): NoteRemoveAction => {
-  return { type: ActionType.NoteRemove, value: { roomId, noteId } };
-};
+  return { type: ActionType.NoteRemove, value: { roomId, noteId } }
+}
 
 interface NoteUpdateLikesAction {
   type: ActionType.NoteUpdateLikes;
@@ -890,8 +890,8 @@ export const NoteUpdateLikesAction = (
   noteId: string,
   likes: string[]
 ): NoteUpdateLikesAction => {
-  return { type: ActionType.NoteUpdateLikes, value: { roomId, noteId, likes } };
-};
+  return { type: ActionType.NoteUpdateLikes, value: { roomId, noteId, likes } }
+}
 
 interface NoteUpdateRoomAction {
   type: ActionType.NoteUpdateRoom;
@@ -902,16 +902,16 @@ export const NoteUpdateRoomAction = (
   roomId: string,
   notes: RoomNote[]
 ): NoteUpdateRoomAction => {
-  return { type: ActionType.NoteUpdateRoom, value: { roomId, notes } };
-};
+  return { type: ActionType.NoteUpdateRoom, value: { roomId, notes } }
+}
 
 interface SpaceIsClosedAction {
   type: ActionType.SpaceIsClosed;
 }
 
 export const SpaceIsClosedAction = (): SpaceIsClosedAction => {
-  return { type: ActionType.SpaceIsClosed };
-};
+  return { type: ActionType.SpaceIsClosed }
+}
 
 interface SpaceOpenedOrClosedAction {
   type: ActionType.SpaceOpenedOrClosed;
@@ -921,8 +921,8 @@ interface SpaceOpenedOrClosedAction {
 export const SpaceOpenedOrClosedAction = (
   value: boolean
 ): SpaceOpenedOrClosedAction => {
-  return { type: ActionType.SpaceOpenedOrClosed, value };
-};
+  return { type: ActionType.SpaceOpenedOrClosed, value }
+}
 
 interface CommandMessageAction {
   type: ActionType.CommandMessage;

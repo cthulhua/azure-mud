@@ -33,7 +33,7 @@ const connect: AuthenticatedEndpointFunction = async (user: User, inputs: any, l
     userMap[u.id] = minimizeUser(u)
   })
 
-  const roomActivityStatus = await DB.allRoomActivity();
+  const roomActivityStatus = await DB.allRoomActivity()
 
   const response: RoomResponse = {
     roomId: user.roomId,

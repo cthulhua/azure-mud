@@ -1,9 +1,9 @@
-import { User } from "./user";
-import { RoomNote } from "./roomNote";
-import { ServerSettings, RoomActivityStatus } from "./types";
+import { User } from './user'
+import { RoomNote } from './roomNote'
+import { ServerSettings, RoomActivityStatus } from './types'
 
-import Redis from "./redis";
-import { Room } from "./rooms";
+import Redis from './redis'
+import { Room } from './rooms'
 
 interface Database {
   // -----------------------------------------------------------------
@@ -132,5 +132,5 @@ interface Database {
 }
 
 // eslint-disable-next-line no-undef
-export default Database;
-export { Redis as DB };
+export default Database
+export { Redis as DB }
