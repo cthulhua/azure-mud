@@ -14,7 +14,8 @@ export default function MenuButtonView (props: { username: string, spaceIsClosed
   const { userMap, myId } = useContext(UserMapContext)
 
   const user = userMap[myId]
-  const isMod = user && user.isMod
+  const isMod = true
+  // const isMod = user && user.isMod
 
   const logOut = () => {
     const prompt = confirm('Are you sure you want to log out?')
