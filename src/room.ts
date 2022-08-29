@@ -24,21 +24,6 @@ export interface Room {
   riddles?: string[];
 }
 
-export function convertServerRoom (room: Server.Room): Room {
-  return {
-    displayName: room.displayName,
-    id: room.id,
-    shortName: room.shortName,
-    description: room.description,
-    mediaChat: room.mediaChat,
-    hasNoteWall: room.hasNoteWall,
-    noteWallData: room.noteWallData,
-    hidden: room.hidden,
-    specialFeatures: room.specialFeatures,
-    riddles: room.riddles
-  }
-}
-
 export function convertServerRoomData (
   roomData: {
     [roomId: string]: Server.Room;
@@ -52,7 +37,8 @@ export function convertServerRoomData (
     const room = roomData[k]
     console.log('Got room activity status')
     console.log(k)
-    const lastActiveTime = roomActivityStatus.roomActivity[k]
+    const roomActivity = roomActivityStatus
+    const lastActiveTime = roomActivity === undefined ? undefined : roomActivity[k]
     console.log(lastActiveTime)
     let active = false
     if (lastActiveTime !== undefined) {
@@ -64,14 +50,13 @@ export function convertServerRoomData (
       id: room.id,
       shortName: room.shortName,
       description: room.description,
-      noMediaChat: room.noMediaChat,
+      MediaChat: room.mediaChat,
       hasNoteWall: room.hasNoteWall,
       noteWallData: room.noteWallData,
       hidden: room.hidden,
       specialFeatures: room.specialFeatures,
       active: active
     }
-    newObj[k] = convertServerRoom(room)
   })
 
   return newObj
